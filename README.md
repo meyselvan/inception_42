@@ -29,3 +29,34 @@ ssh kullanıcıadı@ip
 ```bash
 ssh kullanıcıadı@localhost -p 3022
 ```
+
+Temel SQL komutları:
+
+```sql
+-- Veritabanlarını listele
+SHOW DATABASES;
+
+-- Veritabanı oluştur
+CREATE DATABASE wordpress;
+
+-- Kullanıcı oluştur
+CREATE USER 'wpuser'@'%' IDENTIFIED BY 'password';
+
+-- Kullanıcıya yetki ver
+GRANT ALL PRIVILEGES ON wordpress.* TO 'wpuser'@'%';
+
+-- Yetkileri yenile
+FLUSH PRIVILEGES;
+
+-- Veritabanını seç
+USE wordpress;
+
+-- Tabloları listele
+SHOW TABLES;
+
+-- Kullanıcıları listele
+SELECT User, Host FROM mysql.user;
+
+-- Veritabanından çık
+EXIT;
+```
