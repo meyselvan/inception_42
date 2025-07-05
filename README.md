@@ -65,3 +65,18 @@ Docker build'in cache'ini temizlemek için:
 ```bash
 cd /home/vboxuser/Downloads/inception_42 && docker system prune -f
 ```
+
+Docker container loglarına bakma:
+
+```bash
+# Tüm servislerin logları
+docker-compose -f ./srcs/docker-compose.yml logs
+
+# Belirli bir servisin logları
+docker-compose -f ./srcs/docker-compose.yml logs wordpress
+docker-compose -f ./srcs/docker-compose.yml logs nginx
+docker-compose -f ./srcs/docker-compose.yml logs mariadb
+
+# Canlı log takibi (real-time)
+docker-compose -f ./srcs/docker-compose.yml logs -f
+```

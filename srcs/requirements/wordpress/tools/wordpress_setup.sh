@@ -13,6 +13,7 @@ if [ ! -f /var/www/html/wp-config.php ]; then
         --dbuser=$MYSQL_USER \
         --dbpass=$MYSQL_PASSWORD \
         --dbhost=mariadb:3306 \
+        --dbcharset=utf8mb4 \
         --allow-root
     
     # WordPress kurulumu
