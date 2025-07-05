@@ -60,3 +60,8 @@ SELECT User, Host FROM mysql.user;
 -- Veritabanından çık
 EXIT;
 ```
+Docker build'in cache'ini temizlemek için:
+
+```bash
+cd /home/vboxuser/Downloads/inception_42 && docker system prune -f
+```

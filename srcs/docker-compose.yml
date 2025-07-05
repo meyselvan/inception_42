@@ -1,3 +1,5 @@
+version: '3.7'
+
 services:
   mariadb:
     container_name: mariadb
@@ -54,6 +56,7 @@ secrets:
 networks:
   inception_network:
     driver: bridge
+    name: inception_network
 
 volumes:
   mariadbVol:
