@@ -8,8 +8,9 @@ RUN apt-get update && apt-get install -y \
         mariadb-server \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-RUN mkdir -p /run/mysqld /docker-entrypoint-initdb.d && \
-    chown -R mysql:mysql /run/mysqld
+RUN mkdir -p /run/mysqld /var/lib/mysql /var/log/mysql && \
+    chown -R mysql:mysql /run/mysqld /var/lib/mysql /var/log/mysql && \
+    chmod -R 755 /run/mysqld /var/lib/mysql /var/log/mysql
 
 COPY ./conf/50-server.conf /etc/mysql/mariadb.conf.d/50-server.conf
 COPY ./tools/db_init.sql /tmp/set.sql
