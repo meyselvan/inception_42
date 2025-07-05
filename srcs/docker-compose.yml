@@ -2,7 +2,8 @@ services:
   mariadb:
     container_name: mariadb
     restart: always
-    expose: "3306"
+    expose:
+      - "3306"
     env_file: .env
     build:
       context: ./requirements/mariadb
@@ -17,7 +18,8 @@ services:
   wordpress:
     container_name: wordpress
     restart: always
-    expose: "9000"
+    expose:
+      - "9000"
     env_file: .env
     depends_on:
       - mariadb
@@ -31,7 +33,8 @@ services:
   nginx:
     container_name: nginx
     restart: always
-    ports: "443:443"
+    ports:
+      - "443:443"
     env_file: .env
     depends_on:
       - wordpress
@@ -44,9 +47,9 @@ services:
 
 secrets:
   mysql_root_password:
-    file: ./secrets/mysql_root_password.txt
+    file: ./secrets/mysql_root_password
   mysql_password:
-    file: ./secrets/mysql_password.txt
+    file: ./secrets/mysql_password
 
 networks:
   inception_network:
