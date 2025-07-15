@@ -9,13 +9,6 @@ chmod -R 755 /var/www/html /run/php /var/log/php
 # WordPress çalışma dizinine geç
 cd /var/www/html
 
-# MariaDB'nin hazır olmasını bekle
-echo "MariaDB bağlantısı bekleniyor..."
-timeout 60 bash -c 'until mysqladmin ping -h mariadb --silent; do sleep 2; done' || {
-    echo "MariaDB bağlantısı başarısız!"
-    exit 1
-}
-
 # WordPress indirme ve kurulum
 if [ ! -f /var/www/html/wp-config.php ]; then
     echo "WordPress kuruluyor..."
