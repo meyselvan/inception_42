@@ -22,10 +22,13 @@ RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli
     && mv wp-cli.phar /usr/local/bin/wp
 
 # PHP-FPM konfigürasyonu
-RUN sed -i 's/listen = \/run\/php\/php7.4-fpm.sock/listen = 9000/' /etc/php/7.4/fpm/pool.d/www.conf
+COPY ./conf/www.conf /etc/php/7.4/fpm/pool.d/www.conf
 
-# WordPress dizini oluştur
-RUN mkdir -p /var/www/html
+# WordPress dizini oluştur ve izinleri ayarla
+RUN mkdir -p /var/www/html /run/php /var/log/php && \
+    chown -R www-data:www-data /var/www/html /run/php /var/log/php && \
+    chmod -R 755 /var/www/html /run/php /var/log/php
+
 WORKDIR /var/www/html
 
 # WordPress kurulum scripti

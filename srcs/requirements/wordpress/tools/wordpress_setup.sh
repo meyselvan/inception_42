@@ -1,5 +1,21 @@
 #!/bin/bash
 
+# Dizin ve izin ayarları
+echo "Dizin ve izinler ayarlanıyor..."
+mkdir -p /var/www/html /run/php /var/log/php
+chown -R www-data:www-data /var/www/html /run/php /var/log/php
+chmod -R 755 /var/www/html /run/php /var/log/php
+
+# WordPress çalışma dizinine geç
+cd /var/www/html
+
+# MariaDB'nin hazır olmasını bekle
+echo "MariaDB bağlantısı bekleniyor..."
+timeout 60 bash -c 'until mysqladmin ping -h mariadb --silent; do sleep 2; done' || {
+    echo "MariaDB bağlantısı başarısız!"
+    exit 1
+}
+
 # WordPress indirme ve kurulum
 if [ ! -f /var/www/html/wp-config.php ]; then
     echo "WordPress kuruluyor..."
@@ -32,7 +48,12 @@ if [ ! -f /var/www/html/wp-config.php ]; then
         --allow-root
         
     echo "WordPress kurulumu tamamlandı!"
+else
+    echo "WordPress zaten kurulu."
 fi
+
+# Dosya sahipliğini düzelt
+chown -R www-data:www-data /var/www/html
 
 # PHP-FPM başlat
 echo "PHP-FPM başlatılıyor..."
