@@ -14,6 +14,8 @@ RUN apt-get update && apt-get install -y \
     php7.4-zip \
     curl \
     wget \
+    netcat-openbsd \
+    mariadb-client \
     && rm -rf /var/lib/apt/lists/*
 
 # WordPress CLI kurulumu
