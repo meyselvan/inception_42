@@ -16,7 +16,8 @@ sudo apt install ssh
 systmctl start ssh
 ```
 
-2 - VM'in Ayarlar/Ağ sekmesinde NAT'ı Bridge Adaptöre çevirmek veya NAT kullanılmak isteniyosa terminal için port yönlendirmesi yapmak (TCP/Host Port:3022/Guest Port: 22)
+2 - VM'in Ayarlar/Ağ sekmesinde NAT'ı Bridged Adaptöre çevirmek veya NAT kullanılmak isteniyosa terminal için port yönlendirmesi yapmak (TCP/Host Port:3022/Guest Port: 22)
++ NAT, sanal makinenin host bilgisayarın internetini paylaşmasını sağlar. Bridged adaptör ise sanal makineyi ağdaki ayrı bir cihaz gibi gösterir ve kendi IP adresini doğrudan ağdan alır.
 
 -> eğer Bridge Adaptor ise;
 
@@ -79,4 +80,10 @@ docker-compose -f ./srcs/docker-compose.yml logs mariadb
 
 # Canlı log takibi (real-time)
 docker-compose -f ./srcs/docker-compose.yml logs -f
+```
+
+docker-compose'un genişletilmiş hali;
+
+```bash
+docker-compose -f ./srcs/docker-compose.yml config
 ```

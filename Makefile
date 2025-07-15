@@ -1,5 +1,5 @@
 COMPOSE_FILE := srcs/docker-compose.yml
-DATA_DIR := /home/$(USER)/data
+DATA_DIR := /home/relvan/data
 WORDPRESS_DIR := $(DATA_DIR)/wordpress
 MARIADB_DIR := $(DATA_DIR)/mariadb
 ENV_FILE := srcs/.env
@@ -14,9 +14,9 @@ all: directories addhost up
 
 directories:
 	@echo "📁 Creating data directories..."
-	@sudo mkdir -p $(WORDPRESS_DIR)
-	@sudo mkdir -p $(MARIADB_DIR)
-	@sudo chown -R $(USER):$(USER) $(DATA_DIR)
+	@mkdir -p $(WORDPRESS_DIR)
+	@mkdir -p $(MARIADB_DIR)
+	@chown -R relvan:relvan $(DATA_DIR)
 	@echo "✅ Directories created: $(DATA_DIR)"
 
 addhost:
@@ -179,6 +179,9 @@ help:
 	@echo "🌐 Current domain: $(DOMAIN_NAME)"
 	@echo "📁 Data directory: $(DATA_DIR)"
 
+# ============================================================================
+# PHONY TARGETS
+# ============================================================================
 .PHONY: all up down start stop restart clean fclean re rebuild reset \
         directories addhost removehost status logs logs-nginx logs-wordpress logs-mariadb \
         shell-nginx shell-wordpress shell-mariadb db-connect \
