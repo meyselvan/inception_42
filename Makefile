@@ -16,7 +16,7 @@ directories:
 	@mkdir -p $(WORDPRESS_DIR)
 	@mkdir -p $(MARIADB_DIR)
 	@chown -R relvan:relvan $(DATA_DIR)
-	@echo "✅ Directories created: $(DATA_DIR)"
+	@echo "Directories created: $(DATA_DIR)"
 
 addhost:
 	@echo "Configuring hosts file for $(DOMAIN_NAME)..."
@@ -25,7 +25,7 @@ addhost:
 		echo "127.0.0.1 $(DOMAIN_NAME)" | sudo tee -a /etc/hosts > /dev/null; \
 		echo "Host entry added: 127.0.0.1 $(DOMAIN_NAME)"; \
 	else \
-		echo "ℹ️  Host entry already exists for $(DOMAIN_NAME)"; \
+		echo "ℹHost entry already exists for $(DOMAIN_NAME)"; \
 	fi
 
 up: directories
@@ -116,6 +116,14 @@ fclean: clean
 	fi
 	@echo "Full cleanup completed!"
 
+nuke:
+	@echo "Nuking all Docker containers, images, and volumes..."
+	- docker stop $$(docker ps -qa)
+	- docker rm $$(docker ps -qa)
+	- docker rmi -f $$(docker images -qa)
+	- docker volume rm $$(docker volume ls -q)
+	- docker network rm $$(docker network ls -q) 2>/dev/null
+	@echo "Nuke operation completed!"
 
 re: fclean all
 	@echo "Full rebuild completed!"

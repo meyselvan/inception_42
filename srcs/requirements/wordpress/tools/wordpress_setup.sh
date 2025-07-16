@@ -22,22 +22,14 @@ mkdir -p /var/www/html /run/php /var/log/php
 chown -R www-data:www-data /var/www/html /run/php /var/log/php
 chmod -R 755 /var/www/html /run/php /var/log/php
 
-# WordPress çalışma dizinine geç
-cd /var/www/html
-
-# MariaDB'nin hazır olmasını bekle
-echo "MariaDB bağlantısı bekleniyor..."
-timeout 60 bash -c '
-until nc -z mariadb 3306; do
-    echo "MariaDB bağlantısı bekleniyor..."
-    sleep 2
-done
-echo "MariaDB bağlantısı başarılı!"
-'
-
 # WordPress indirme ve kurulum
 if [ ! -f /var/www/html/wp-config.php ]; then
     echo "WordPress kuruluyor..."
+
+    until mysql -h ${MYSQL_HOST} -u ${MYSQL_USER} -p"$(cat /run/secrets/db_pass)" -e "SELECT 1;" >/dev/null 2>&1; do
+        echo "Waiting for MariaDB connection..."
+        sleep 2
+    done
     
     # WordPress indir
     wp core download --allow-root || {
