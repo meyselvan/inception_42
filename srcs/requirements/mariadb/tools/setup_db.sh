@@ -29,8 +29,14 @@ timeout 30 bash -c 'until mysqladmin ping --silent; do sleep 1; done'
 
 # Root şifresini ayarla
 echo "[INFO] Setting root password..."
+cat > /root/.my.cnf <<EOF
+[client]
+user=root
+password=$MYSQL_ROOT_PASSWORD
+EOF
+chmod 600 /root/.my.cnf
 mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}';"
-mysql -e "FLUSH PRIVILEGES;"
+
 
 # Veritabanı ve kullanıcı oluştur
 echo "[INFO] Creating database and user..."

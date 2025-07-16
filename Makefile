@@ -8,8 +8,8 @@ ENV_FILE := srcs/.env
 DOMAIN_NAME := $(USER).42.fr
 
 all: directories addhost up
-	@echo "\033[32m🚀 Inception project is ready!\033[0m"
-	@echo "\033[32m📝 Access your site at: https://$(DOMAIN_NAME)\033[0m"
+	@echo "\033[32m Inception project is ready!\033[0m"
+	@echo "\033[32m Access your site at: https://$(DOMAIN_NAME)\033[0m"
 
 directories:
 	@echo "Creating data directories..."
@@ -129,22 +129,12 @@ re: fclean all
 	@echo "Full rebuild completed!"
 
 test:
-	@echo "Running basic health checks..."
-	@echo "Testing nginx (HTTPS)..."
 	@curl -k -s -o /dev/null -w "Status: %{http_code}\n" https://$(DOMAIN_NAME)/ || echo "❌ NGINX test failed"
-	@echo "Testing WordPress..."
-	@curl -k -s https://$(DOMAIN_NAME)/ | grep -q "WordPress\|wp-" && echo "WordPress detected" || echo "❌ WordPress test failed"
-	@echo "Testing containers..."
-	@docker-compose -f $(COMPOSE_FILE) ps | grep -q "Up" && echo "Containers running" || echo "❌ Container test failed"
-
-validate:
-	@echo "Validating configuration..."
-	@if [ ! -f $(COMPOSE_FILE) ]; then echo "❌ docker-compose.yml not found!"; exit 1; fi
-	@if [ ! -f $(ENV_FILE) ]; then echo "❌ .env file not found!"; exit 1; fi
-	@docker-compose -f $(COMPOSE_FILE) config -q && echo "docker-compose.yml is valid" || echo "❌ docker-compose.yml validation failed"
-	@echo "Configuration validation passed!"
+	@curl -k -s https://$(DOMAIN_NAME)/ | grep -q "WordPress\|wp-" && echo "✅ WordPress detected" || echo "❌ WordPress test failed"
+	@docker-compose -f srcs/docker-compose.yml ps | grep -q "Up" && echo "✅ Containers running" || echo "❌ Container test failed"
+	@docker-compose -f srcs/docker-compose.yml config -q && echo "✅ docker-compose.yml is valid" || echo "❌ docker-compose.yml validation failed"
 
 .PHONY: all up down start stop restart clean fclean re \
         directories addhost status logs logs-nginx logs-wordpress logs-mariadb \
         shell-nginx shell-wordpress shell-mariadb db-connect \
-        test validate
+        test
