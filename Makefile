@@ -25,7 +25,7 @@ addhost:
 		echo "127.0.0.1 $(DOMAIN_NAME)" | sudo tee -a /etc/hosts > /dev/null; \
 		echo "Host entry added: 127.0.0.1 $(DOMAIN_NAME)"; \
 	else \
-		echo "ℹHost entry already exists for $(DOMAIN_NAME)"; \
+		echo "Host entry already exists for $(DOMAIN_NAME)"; \
 	fi
 
 up: directories
@@ -123,6 +123,7 @@ nuke:
 	- docker rmi -f $$(docker images -qa)
 	- docker volume rm $$(docker volume ls -q)
 	- docker network rm $$(docker network ls -q) 2>/dev/null
+	//??? DATABASE CONNECTION ERROR ICIN VOLUME SEYLERİ SİLİNMELİ
 	@echo "Nuke operation completed!"
 
 re: fclean all

@@ -1,6 +1,7 @@
 FROM debian:bullseye
 
 ENV DEBIAN_FRONTEND=noninteractive
+
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     php-fpm \
@@ -15,16 +16,17 @@ RUN apt-get update && \
 RUN mkdir -p /run/mysqld && \
     chown mysql:mysql /run/mysqld
 
-COPY ./conf/50-server.conf /etc/mysql/mariadb.conf.d/50-server.conf
-COPY ./tools/init.sql /tmp/set.sql
-RUN chmod 644 /etc/mysql/mariadb.conf.d/50-server.conf && \
-	chmod 644 /tmp/set.sql
-COPY ./tools/setup_db.sh /usr/local/bin/config.sh
+COPY ./conf/50-server.conf /etc/mysql/mariadb.conf.d/50-server.cnf
+RUN chmod 644 /etc/mysql/mariadb.conf.d/50-server.cnf
 
-RUN chmod +x /usr/local/bin/config.sh
+COPY ./tools/init.sql /tmp/set.sql
+RUN chmod 644 /tmp/set.sql
+
+COPY ./tools/setup.sh /usr/local/bin/setup.sh
+RUN chmod +x /usr/local/bin/setup.sh
 
 EXPOSE 3306
 
-ENTRYPOINT ["/usr/local/bin/config.sh"]
+ENTRYPOINT ["/usr/local/bin/setup.sh"]
 
 CMD ["mysqld_safe"]

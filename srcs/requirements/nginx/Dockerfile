@@ -11,19 +11,16 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Nginx dizinlerini oluştur ve varsayılan siteleri kaldır
 RUN mkdir -p /etc/nginx/ssl /var/log/nginx /var/www/html && \
     chown -R www-data:www-data /var/log/nginx /etc/nginx/ssl /var/www/html && \
     chmod -R 755 /var/log/nginx /etc/nginx/ssl /var/www/html && \
     rm -f /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
 
-# Server konfigürasyonunu kopyala
 COPY conf/server.conf /etc/nginx/sites-enabled/
 
 RUN ln -sf /dev/stdout /var/log/nginx/access.log && \
     ln -sf /dev/stderr /var/log/nginx/error.log
 
-# SSL sertifikası oluştur
 RUN openssl req -x509 -nodes -days 365 \
     -newkey rsa:2048 \
     -keyout /etc/ssl/private/ssl.key \
