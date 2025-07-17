@@ -1,10 +1,17 @@
 #!/bin/bash
 set -euo pipefail
 
-export MYSQL_ROOT_PASSWORD=$(cat /run/secrets/mysql_root_password 2>/dev/null || echo "default_root_pass")
-export MYSQL_PASSWORD=$(cat /run/secrets/mysql_password 2>/dev/null || echo "default_user_pass")
-export MYSQL_DATABASE=${MYSQL_DATABASE:-wordpress}
-export MYSQL_USER=${MYSQL_USER:-relvan}
+# Environment variables'ı kullan (.env dosyasından)
+: ${MYSQL_ROOT_PASSWORD:?"MYSQL_ROOT_PASSWORD environment variable gerekli"}
+: ${MYSQL_PASSWORD:?"MYSQL_PASSWORD environment variable gerekli"}
+: ${MYSQL_DATABASE:?"MYSQL_DATABASE environment variable gerekli"}
+: ${MYSQL_USER:?"MYSQL_USER environment variable gerekli"}
+
+echo "[INFO] MariaDB variables:"
+echo "MYSQL_DATABASE: $MYSQL_DATABASE"
+echo "MYSQL_USER: $MYSQL_USER"
+echo "MYSQL_PASSWORD: $MYSQL_PASSWORD"
+echo "MYSQL_ROOT_PASSWORD: $MYSQL_ROOT_PASSWORD"
 
 # Dizinleri oluştur ve izinleri ayarla
 echo "[INFO] Setting up directories and permissions..."
@@ -12,23 +19,16 @@ mkdir -p /var/lib/mysql /run/mysqld /var/log/mysql
 chown -R mysql:mysql /var/lib/mysql /run/mysqld /var/log/mysql
 chmod -R 755 /var/lib/mysql /run/mysqld /var/log/mysql
 
-# Veritabanını başlat (eğer yoksa)
 if [ ! -d "/var/lib/mysql/mysql" ]; then
   echo "[INFO] Initializing database..."
   mysql_install_db --user=mysql --basedir=/usr --datadir=/var/lib/mysql
 fi
 
-# MariaDB'yi geçici olarak başlat
-echo "[INFO] Starting MariaDB temporarily..."
-mysqld_safe --user=mysql --datadir=/var/lib/mysql --skip-networking &
+mysqld --user=mysql &
 PID=$!
-
-# MariaDB'nin başlamasını bekle
 echo "[INFO] Waiting for MariaDB..."
 timeout 30 bash -c 'until mysqladmin ping --silent; do sleep 1; done'
 
-# Root şifresini ayarla
-echo "[INFO] Setting root password..."
 cat > /root/.my.cnf <<EOF
 [client]
 user=root
@@ -38,20 +38,16 @@ chmod 600 /root/.my.cnf
 mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}';"
 
 
-# Veritabanı ve kullanıcı oluştur
 echo "[INFO] Creating database and user..."
-mysql -u root -p"${MYSQL_ROOT_PASSWORD}" -e "
-CREATE DATABASE IF NOT EXISTS ${MYSQL_DATABASE};
-CREATE USER IF NOT EXISTS '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_PASSWORD}';
-GRANT ALL PRIVILEGES ON ${MYSQL_DATABASE}.* TO '${MYSQL_USER}'@'%';
-FLUSH PRIVILEGES;
-"
+# Create the directory first
+mkdir -p /docker-entrypoint-initdb.d
+envsubst < /tmp/set.sql > /docker-entrypoint-initdb.d/init.sql
+mysql < /docker-entrypoint-initdb.d/init.sql
 
-# Geçici MariaDB'yi durdur
-echo "[INFO] Stopping temporary MariaDB..."
-mysqladmin -u root -p"${MYSQL_ROOT_PASSWORD}" shutdown
+rm -f /docker-entrypoint-initdb.d/init.sql
+kill "$PID"
 wait "$PID"
 
-echo "[INFO] MariaDB setup complete. Starting normally..."
+echo "[INFO] MariaDB setup complete."
 # Normal modda başlat
-exec mysqld --user=mysql --console
+exec "$@"

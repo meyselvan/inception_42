@@ -11,9 +11,6 @@ services:
       context: ./requirements/mariadb
     volumes:
       - mariadbVol:/var/lib/mysql
-    secrets:
-      - mysql_root_password
-      - mysql_password
     networks:
       - inception_network
 
@@ -46,12 +43,6 @@ services:
       - wordpressVol:/var/www/html
     networks:
       - inception_network
-
-secrets:
-  mysql_root_password:
-    file: ./secrets/mysql_root_password
-  mysql_password:
-    file: ./secrets/mysql_password
 
 networks:
   inception_network:
