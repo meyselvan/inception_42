@@ -5,7 +5,6 @@ services:
     image: mariadb
     build:
       context: ./requirements/mariadb
-      dockerfile: Dockerfile
     container_name: mariadb
     env_file: .env
     volumes:
@@ -20,7 +19,6 @@ services:
     image: wordpress
     build:
       context: ./requirements/wordpress
-      dockerfile: Dockerfile
     container_name: wordpress
     env_file: .env
     volumes:
@@ -37,7 +35,6 @@ services:
     image: nginx
     build:
       context: ./requirements/nginx
-      dockerfile: Dockerfile
     container_name: nginx
     env_file: .env
     ports:
@@ -62,9 +59,11 @@ volumes:
       type: none
       o: bind
       device: /home/relvan/data/mariadb
+    name: mariadbVol
   wordpressVol:
     driver: local
     driver_opts:
       type: none
       o: bind
       device: /home/relvan/data/wordpress
+    name: wordpressVol

@@ -1,11 +1,10 @@
-USER := relvan
-COMPOSE_FILE := srcs/docker-compose.yml
-DATA_DIR := /home/relvan/data
-WORDPRESS_DIR := $(DATA_DIR)/wordpress
-MARIADB_DIR := $(DATA_DIR)/mariadb
-ENV_FILE := srcs/.env
+USER = relvan
+COMPOSE_FILE = srcs/docker-compose.yml
+DATA_DIR = /home/relvan/data
+WORDPRESS_DIR = $(DATA_DIR)/wordpress
+MARIADB_DIR = $(DATA_DIR)/mariadb
 
-DOMAIN_NAME := $(USER).42.fr
+DOMAIN_NAME = $(USER).42.fr
 
 all: directories addhost up
 	@echo "\033[32m Inception project is ready!\033[0m"
@@ -69,53 +68,6 @@ logs:
 	@echo "Showing container logs..."
 	@docker-compose -f $(COMPOSE_FILE) logs -f
 
-logs-nginx:
-	@docker-compose -f $(COMPOSE_FILE) logs -f nginx
-
-logs-wordpress:
-	@docker-compose -f $(COMPOSE_FILE) logs -f wordpress
-
-logs-mariadb:
-	@docker-compose -f $(COMPOSE_FILE) logs -f mariadb
-
-shell-nginx:
-	@echo "Opening shell in nginx container..."
-	@docker-compose -f $(COMPOSE_FILE) exec nginx /bin/bash
-
-shell-wordpress:
-	@echo "Opening shell in wordpress container..."
-	@docker-compose -f $(COMPOSE_FILE) exec wordpress /bin/bash
-
-shell-mariadb:
-	@echo "Opening shell in mariadb container..."
-	@docker-compose -f $(COMPOSE_FILE) exec mariadb /bin/bash
-
-db-connect:
-	@echo "Connecting to MariaDB..."
-	@docker-compose -f $(COMPOSE_FILE) exec mariadb mysql -u root -p
-
-clean: down
-	@echo "Cleaning Docker system..."
-	@docker-compose -f $(COMPOSE_FILE) down -v --remove-orphans
-	@docker system prune -af --volumes
-	@echo "Docker system cleaned!"
-
-fclean: clean
-	@echo "Full cleanup - removing all Docker images and data..."
-	@if [ -n "$$(docker images -q)" ]; then \
-		echo "Removing all Docker images..."; \
-		docker rmi -f $$(docker images -q); \
-	else \
-		echo "No Docker images to remove."; \
-	fi
-	@echo "Removing data directories..."
-	@sudo rm -rf $(WORDPRESS_DIR) $(MARIADB_DIR)
-	@if [ -d $(DATA_DIR) ] && [ -z "$$(ls -A $(DATA_DIR))" ]; then \
-		sudo rm -rf $(DATA_DIR); \
-		echo "Empty data directory removed"; \
-	fi
-	@echo "Full cleanup completed!"
-
 nuke:
 	@echo "Nuking all Docker containers, images, and volumes..."
 	- docker stop $$(docker ps -qa)
@@ -123,19 +75,11 @@ nuke:
 	- docker rmi -f $$(docker images -qa)
 	- docker volume rm $$(docker volume ls -q)
 	- docker network rm $$(docker network ls -q) 2>/dev/null
-	//??? DATABASE CONNECTION ERROR ICIN VOLUME SEYLERİ SİLİNMELİ
+	- rm -rf $(WORDPRESS_DIR) $(MARIADB_DIR)
 	@echo "Nuke operation completed!"
 
-re: fclean all
-	@echo "Full rebuild completed!"
+re: nuke all
+	@echo "Re-initializing project..."
 
-test:
-	@curl -k -s -o /dev/null -w "Status: %{http_code}\n" https://$(DOMAIN_NAME)/ || echo "❌ NGINX test failed"
-	@curl -k -s https://$(DOMAIN_NAME)/ | grep -q "WordPress\|wp-" && echo "✅ WordPress detected" || echo "❌ WordPress test failed"
-	@docker-compose -f srcs/docker-compose.yml ps | grep -q "Up" && echo "✅ Containers running" || echo "❌ Container test failed"
-	@docker-compose -f srcs/docker-compose.yml config -q && echo "✅ docker-compose.yml is valid" || echo "❌ docker-compose.yml validation failed"
-
-.PHONY: all up down start stop restart clean fclean re \
-        directories addhost status logs logs-nginx logs-wordpress logs-mariadb \
-        shell-nginx shell-wordpress shell-mariadb db-connect \
-        test
+.PHONY: all up down start stop restart re \
+        directories addhost status logs nuke \

@@ -4,11 +4,10 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-        curl \
-        iputils-ping \
-        nginx \
-        openssl && \
-    apt-get clean && \
+    curl \
+    iputils-ping \
+    nginx \
+    openssl && \
     rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /etc/nginx/ssl /var/log/nginx /var/www/html && \

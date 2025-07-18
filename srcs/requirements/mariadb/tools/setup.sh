@@ -1,39 +1,15 @@
 #!/bin/bash
-set -euo pipefail
 
-export MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
-export MYSQL_PASSWORD=${MYSQL_PASSWORD}
-export MYSQL_DATABASE=${MYSQL_DATABASE:-wordpress}
-export MYSQL_USER=${MYSQL_USER:-relvan}
+touch init.sql
 
-if [ ! -d "/var/lib/mysql/mysql" ]; then
-  echo "[INFO] Initializing database..."
-  mysqld --initialize-insecure --user=mysql
-fi
+echo "CREATE DATABASE IF NOT EXISTS $MYSQL_DATABASE;" >> init.sql
+echo "CREATE USER IF NOT EXISTS '$MYSQL_USER'@'%' IDENTIFIED BY '$MYSQL_PASSWORD';" >> init.sql
+echo "GRANT ALL PRIVILEGES ON $MYSQL_DATABASE.* TO '$MYSQL_USER'@'%';" >> init.sql
+echo "ALTER USER 'root'@'localhost' IDENTIFIED BY '$MYSQL_ROOT_PASSWORD';" >> init.sql
+echo "FLUSH PRIVILEGES;" >> init.sql
 
-mysqld --user=mysql &
-PID=$!
-echo "[INFO] Waiting for MariaDB..."
-timeout 30 bash -c 'until mysqladmin ping --silent; do sleep 1; done'
+mkdir -p /run/mysqld
 
-echo "[INFO] Setting root password..."
-cat > /root/.my.cnf <<EOF
-[client]
-user=root
-password=$MYSQL_ROOT_PASSWORD
-EOF
-chmod 600 /root/.my.cnf
-mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}';"
-
-echo "[INFO] Running init.sql..."
-mkdir -p /docker-entrypoint-initdb.d
-envsubst < /tmp/set.sql > /docker-entrypoint-initdb.d/init.sql
-mysql < /docker-entrypoint-initdb.d/init.sql
-
-rm -f /root/.my.cnf /docker-entrypoint-initdb.d/init.sql
-kill "$PID"
-wait "$PID"
-
-echo "[INFO] MariaDB setup complete."
+mv init.sql /etc/mysql/init.sql
 
 exec "$@"
